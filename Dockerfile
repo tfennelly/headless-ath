@@ -72,19 +72,10 @@ RUN curl -fsSL http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binar
 ENV MAVEN_HOME /usr/share/maven
 
 #==========
-# Ant
-#==========
-RUN curl -fsSL https://www.apache.org/dist/ant/binaries/apache-ant-1.9.7-bin.tar.gz | tar xzf - -C /usr/share \
-  && mv /usr/share/apache-ant-1.9.7 /usr/share/ant \
-  && ln -s /usr/share/ant/bin/ant /usr/bin/ant
-
-ENV ANT_HOME /usr/share/ant
-
-#==========
 # Selenium
 #==========
 RUN  mkdir -p /opt/selenium \
-  && wget --no-verbose http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar -O /opt/selenium/selenium-server-standalone.jar
+  && wget --no-verbose http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar -O /opt/selenium/selenium-server-standalone.jar
 
 #========================================
 # Add normal user with passwordless sudo
@@ -101,7 +92,17 @@ RUN useradd jenkins --shell /bin/bash --create-home \
 #===============
 RUN apt-get update -qqy \
   && apt-get -qqy --no-install-recommends install \
-    xvfb firefox \
+    xvfb \
+    firefox=45.0.2+build1-0ubuntu1 \
+  && rm -rf /var/lib/apt/lists/*
+
+#=============================================
+# Misc packages needed by the ATH
+#=============================================
+RUN apt-get update -qqy \
+  && apt-get -qqy --no-install-recommends install \
+    libxml2-utils \
+    libssl-dev \
   && rm -rf /var/lib/apt/lists/*
 
 #========================
@@ -121,73 +122,6 @@ ENV DISPLAY :99.0
 #====================================
 COPY entry_point.sh /opt/bin/entry_point.sh
 RUN chmod +x /opt/bin/entry_point.sh
-
-#====================================
-# Cloud Foundry CLI
-# https://github.com/cloudfoundry/cli
-#====================================
-RUN wget -O - "http://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -C /usr/local/bin -zxf -
-
-#====================================
-# AWS CLI
-#====================================
-RUN pip install awscli
-
-# compatibility with CloudBees AWS CLI Plugin which expects pip to be installed as user
-RUN mkdir -p /home/jenkins/.local/bin/ \
-  && ln -s /usr/bin/pip /home/jenkins/.local/bin/pip \
-  && chown -R jenkins:jenkins /home/jenkins/.local
-
-#====================================
-# NODE JS
-# See https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
-#====================================
-RUN curl -sL https://deb.nodesource.com/setup_4.x | bash \
-    && apt-get install -y nodejs
-
-#====================================
-# AZURE CLI
-# See https://hub.docker.com/r/microsoft/azure-cli/~/dockerfile/
-#====================================
-
-RUN npm install --global azure-cli@0.10.1
-
-#====================================
-# BOWER, GRUNT, GULP
-#====================================
-
-RUN npm install --global grunt-cli@0.1.2 bower@1.7.9 gulp@3.9.1
-
-#====================================
-# Kubernetes CLI
-# See http://kubernetes.io/v1.0/docs/getting-started-guides/aws/kubectl.html
-#====================================
-RUN curl https://storage.googleapis.com/kubernetes-release/release/v1.2.3/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
-
-#====================================
-# OPENSHIFT V3 CLI
-# Only install "oc" executable, don't install "openshift", "oadmin"...
-#====================================
-RUN mkdir /var/tmp/openshift \
-      && wget -O - "https://github.com/openshift/origin/releases/download/v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-linux-64bit.tar.gz" \
-      | tar -C /var/tmp/openshift --strip-components=1 -zxf - \
-      && mv /var/tmp/openshift/oc /usr/local/bin \
-      && rm -rf /var/tmp/openshift
-
-#====================================
-# JMETER
-#====================================
-RUN mkdir /opt/jmeter \
-      && wget -O - "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-3.0.tgz" \
-      | tar -xz --strip=1 -C /opt/jmeter
-
-#====================================
-# MYSQL CLIENT
-#====================================
-RUN apt-get update -qqy \
-  && apt-get -qqy --no-install-recommends install \
-    mysql-client \
-  && rm -rf /var/lib/apt/lists/*
 
 USER jenkins
 
