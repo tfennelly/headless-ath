@@ -88,13 +88,18 @@ RUN useradd jenkins --shell /bin/bash --create-home \
 # https://raw.githubusercontent.com/SeleniumHQ/docker-selenium/master/NodeFirefox/Dockerfile
 
 #===============
-# XVFB & FIREFOX
+# XVFB
 #===============
 RUN apt-get update -qqy \
   && apt-get -qqy --no-install-recommends install \
     xvfb \
-    firefox=45.0.2+build1-0ubuntu1 \
   && rm -rf /var/lib/apt/lists/*
+
+#===============
+# FIREFOX
+#===============
+RUN wget sourceforge.net/projects/ubuntuzilla/files/mozilla/apt/pool/main/f/firefox-mozilla-build/firefox-mozilla-build_45.0.2-0ubuntu1_amd64.deb -O /opt/firefox.deb
+RUN dpkg -i /opt/firefox.deb
 
 #=============================================
 # Misc packages needed by the ATH
