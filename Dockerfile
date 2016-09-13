@@ -22,6 +22,9 @@ FROM ubuntu:15.04
 # https://github.com/SeleniumHQ/docker-selenium/blob/master/Base/Dockerfile
 #################################################
 
+ENV MAVEN_VERSION 3.3.9
+ENV FIREFOX_VERSION 45.0.2
+ENV SELENIUM_VERSION 2.53.1
 
 #================================================
 # Customize sources for apt-get
@@ -63,7 +66,6 @@ RUN [ -f "/etc/ssl/certs/java/cacerts" ] || /var/lib/dpkg/info/ca-certificates-j
 #==========
 # Maven
 #==========
-ENV MAVEN_VERSION 3.3.9
 
 RUN curl -fsSL http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar xzf - -C /usr/share \
   && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
@@ -75,7 +77,8 @@ ENV MAVEN_HOME /usr/share/maven
 # Selenium
 #==========
 RUN  mkdir -p /opt/selenium \
-  && wget --no-verbose http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.1.jar -O /opt/selenium/selenium-server-standalone.jar
+  && SELENIUM_BASE_VERSION=`echo $SELENIUM_VERSION | awk -F'.' '{print $1"."$2}'` \
+  && wget --no-verbose http://selenium-release.storage.googleapis.com/$SELENIUM_BASE_VERSION/selenium-server-standalone-$SELENIUM_VERSION.jar -O /opt/selenium/selenium-server-standalone.jar
 
 #========================================
 # Add normal user with passwordless sudo
@@ -98,7 +101,7 @@ RUN apt-get update -qqy \
 #===============
 # FIREFOX
 #===============
-RUN wget sourceforge.net/projects/ubuntuzilla/files/mozilla/apt/pool/main/f/firefox-mozilla-build/firefox-mozilla-build_45.0.2-0ubuntu1_amd64.deb -O /opt/firefox.deb
+RUN wget sourceforge.net/projects/ubuntuzilla/files/mozilla/apt/pool/main/f/firefox-mozilla-build/firefox-mozilla-build_$FIREFOX_VERSION-0ubuntu1_amd64.deb -O /opt/firefox.deb
 RUN dpkg -i /opt/firefox.deb
 
 #=============================================
