@@ -1,30 +1,7 @@
 FROM ubuntu:15.04
 
-#
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-#################################################
-# Inspired by
-# https://github.com/SeleniumHQ/docker-selenium/blob/master/Base/Dockerfile
-#################################################
-
 ENV MAVEN_VERSION 3.3.9
-ENV FIREFOX_VERSION 45.0.2
-ENV SELENIUM_VERSION 2.53.1
+ENV NODE_VERSION 6.4.0 
 
 #================================================
 # Customize sources for apt-get
@@ -73,13 +50,6 @@ RUN curl -fsSL http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binar
 
 ENV MAVEN_HOME /usr/share/maven
 
-#==========
-# Selenium
-#==========
-RUN  mkdir -p /opt/selenium \
-  && SELENIUM_BASE_VERSION=`echo $SELENIUM_VERSION | awk -F'.' '{print $1"."$2}'` \
-  && wget --no-verbose http://selenium-release.storage.googleapis.com/$SELENIUM_BASE_VERSION/selenium-server-standalone-$SELENIUM_VERSION.jar -O /opt/selenium/selenium-server-standalone.jar
-
 #========================================
 # Add normal user with passwordless sudo
 #========================================
@@ -91,18 +61,11 @@ RUN useradd jenkins --shell /bin/bash --create-home \
 # https://raw.githubusercontent.com/SeleniumHQ/docker-selenium/master/NodeFirefox/Dockerfile
 
 #===============
-# XVFB
+# Node and NPM
 #===============
-RUN apt-get update -qqy \
-  && apt-get -qqy --no-install-recommends install \
-    xvfb \
-  && rm -rf /var/lib/apt/lists/*
-
-#===============
-# FIREFOX
-#===============
-RUN wget sourceforge.net/projects/ubuntuzilla/files/mozilla/apt/pool/main/f/firefox-mozilla-build/firefox-mozilla-build_$FIREFOX_VERSION-0ubuntu1_amd64.deb -O /opt/firefox.deb
-RUN dpkg -i /opt/firefox.deb
+RUN wget --no-verbose https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz -O /opt/nodejs.tar.xz
+RUN tar -C /usr/local --strip-components 1 -xJf /opt/nodejs.tar.xz
+RUN mkdir /.npm && chmod 777 /.npm
 
 #=============================================
 # Misc packages needed by the ATH
@@ -113,29 +76,6 @@ RUN apt-get update -qqy \
     libssl-dev \
   && rm -rf /var/lib/apt/lists/*
 
-#========================
-# Selenium Configuration
-#========================
-COPY config.json /opt/selenium/config.json
-
-ENV SCREEN_WIDTH 1360
-ENV SCREEN_HEIGHT 1020
-ENV SCREEN_DEPTH 24
-ENV DISPLAY :99.0
-
-# https://github.com/SeleniumHQ/docker-selenium/blob/master/StandaloneFirefox/Dockerfile
-
-#====================================
-# Scripts to run Selenium Standalone
-#====================================
-COPY entry_point.sh /opt/bin/entry_point.sh
-RUN chmod +x /opt/bin/entry_point.sh
-
 USER jenkins
-
 # for dev purpose
 # USER root
-
-ENTRYPOINT ["/opt/bin/entry_point.sh"]
-
-EXPOSE 4444
