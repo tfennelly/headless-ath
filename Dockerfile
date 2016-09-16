@@ -1,4 +1,4 @@
-FROM selenium/standalone-firefox:2.53.0
+FROM ubuntu:16.04
 
 ENV MAVEN_VERSION 3.3.9
 ENV NODE_VERSION 6.4.0 
@@ -15,7 +15,7 @@ RUN apt-get update -qqy \
     openjdk-8-jdk \
     tar \
     zip xz-utils \
-    curl \
+    curl wget \
     git \
     build-essential \
     python \
