@@ -12,6 +12,7 @@ RUN apt-get update
 #========================
 RUN apt-get update -qqy \
   && apt-get -qqy --no-install-recommends install \
+    sudo \
     openjdk-8-jdk \
     tar \
     zip xz-utils \
@@ -56,3 +57,4 @@ RUN sudo useradd bouser --shell /bin/bash --create-home \
   && echo 'bouser:secret' | chpasswd
 
 USER bouser
+WORKDIR /home/bouser
