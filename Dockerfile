@@ -47,4 +47,12 @@ RUN apt-get update -qqy \
     libssl-dev \
   && rm -rf /var/lib/apt/lists/*
   
-USER seluser  
+#========================================
+# Add normal user with passwordless sudo
+#========================================
+RUN sudo useradd bouser --shell /bin/bash --create-home \
+  && sudo usermod -a -G sudo bouser \
+  && echo 'ALL ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers \
+  && echo 'bouser:secret' | chpasswd
+
+USER bouser
