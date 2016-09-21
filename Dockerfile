@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-ENV MAVEN_VERSION 3.3.9
+ENV MAVEN_VERSION 3.3.3
 ENV NODE_VERSION 6.4.0 
 
 USER root
@@ -58,3 +58,4 @@ RUN sudo useradd bouser --shell /bin/bash --create-home \
 
 USER bouser
 WORKDIR /home/bouser
+RUN mkdir /home/bouser/.m2repo
