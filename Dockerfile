@@ -20,6 +20,7 @@ RUN apt-get update -qqy \
     git \
     build-essential \
     python \
+    ping \
   && rm -rf /var/lib/apt/lists/* \
   && sed -i 's/securerandom\.source=file:\/dev\/random/securerandom\.source=file:\/dev\/urandom/' ./usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/java.security
 
@@ -58,4 +59,3 @@ RUN sudo useradd bouser --shell /bin/bash --create-home \
 
 USER bouser
 WORKDIR /home/bouser
-RUN mkdir /home/bouser/.m2repo
